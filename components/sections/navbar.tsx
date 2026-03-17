@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * In the navbar file, the motion animation is used so that when the user scrolls down past a certain point on the website,
  * the navbar slightly pops out, and when the user scrolls back to the top, it settles back in. The class names are there to style the navbar, including giving it its pill-shaped appearance.
@@ -15,8 +17,8 @@ import {Menu, X} from "lucide-react";
 
 
 
-const INITIAL_WIDTH = '70rem';
-const MAX_WIDTH = '800rem';
+const INITIAL_WIDTH = '100%';
+const MAX_WIDTH = '100%';
 
 const overlayVariants = {
     hidden: { opacity: 0 },
@@ -94,15 +96,15 @@ export function Navbar() {
     return (
         <header
             className={cn(
-            'sticky z-50 mx-4 flex justify-center transition-all duration-300 md:mx-0',
-            hasScrolled ? 'top-6' : 'top-4 mx-0'
+            'sticky z-50 flex justify-center transition-all duration-300',
+            hasScrolled ? 'top-6 mx-12' : 'top-4 mx-12'
         )}
             >
             <motion.div
                 initial={{ width: INITIAL_WIDTH }}
                 animate={{ width: hasScrolled ? MAX_WIDTH : INITIAL_WIDTH }}
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-
+                className='w-full'
                 >
                 <div
                     className={cn(
@@ -112,17 +114,17 @@ export function Navbar() {
                             : "px-7 shadow-none",
                     )}
                     >
-                    <div className='flex h-[56px] items-center justify-between p-4'>
-                        <Link href='/' className='flex items-center gap-3'>
+                    <div className='flex h-[56px] items-center justify-between'>
+                        <Link href='/' className='flex items-center gap-3 px-4'>
                             <Icons.logo className='size-7 md:size-10' />
                             <p className='font-semibold text-lg text-primary'>Hephaestus</p>
                         </Link>
 
                         <NavMenu />
 
-                        <div className='flex shrink-0 flex-row items-center gap-1 md:gap-3'>
+                        <div className='flex shrink-0 flex-row items-center gap-1 px-4 md:gap-3'>
                             <div className='flex items-center space-x-6'>
-                                <Link className='hidden h-8 w-fit items-center justify-center rounded-full border border-white/[0.12] bg-secondary px-4 font-normal text-primary-foreground text-sm tracking-wide shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),0_3px_3px_-1.5px_rgba(16,24,40,0.06),0_1px_1px_rgba(16,24,40,0.08)] md:flex dark:text-secondary-foreground'
+                                <Link className='hidden h-10 items-center justify-center rounded-full bg-primary px-6 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all hover:bg-primary/90 hover:scale-105 hover:shadow-lg active:scale-95 md:flex'
                                       href='/chat'
                                       >
                                     Try for free
@@ -222,7 +224,7 @@ export function Navbar() {
                                 <div className="flex flex-col gap-2">
                                     <Link
                                         href="/chat"
-                                        className="flex h-8 w-full items-center justify-center rounded-full border border-white/[0.12] bg-secondary px-4 font-normal text-primary-foreground text-sm tracking-wide shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),0_3px_3px_-1.5px_rgba(16,24,40,0.06),0_1px_1px_rgba(16,24,40,0.08)] transition-all ease-out hover:bg-secondary/80 active:scale-95 dark:text-secondary-foreground"
+                                        className="flex h-10 w-full items-center justify-center rounded-full bg-primary px-4 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all active:scale-95"
                                     >
                                         Try for free
                                     </Link>
