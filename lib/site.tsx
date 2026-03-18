@@ -44,6 +44,14 @@ export interface SiteConfig {
             content: React.ReactNode;
         }[];
     };
+    quoteSection: {
+        quote: string;
+        author: {
+            name: string;
+            role: string;
+            image: string;
+        };
+    };
 }
 
 export const siteConfig: SiteConfig = {
@@ -122,4 +130,53 @@ export const siteConfig: SiteConfig = {
             },
         ],
     },
-};
+    quoteSection: {
+        quote:
+            "The best AI does more than respond. It understands the goal, builds a step-by-step plan, and executes each task with speed, precision, and purpose.",
+        author: {
+            name: "Dave Idoko",
+            role: "Founder, Assets Generator",
+            image: "/Quote/random.png",
+        },
+    },
+},
+featureSection: {
+    title: "Everything You Need to Build AI Agents",
+        description:
+    "AgentKit comes with all the essential features to build production-ready AI applications",
+        items: [
+        {
+            id: 1,
+            title: "Web Search Agent Built-In",
+            content:
+                "Toggle web search on/off with a single click. Your AI agent can search the web for current information, recent events, and up-to-date data when needed.",
+            image:
+                "https://images.unsplash.com/photo-1720371300677-ba4838fa0678?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        },
+        {
+            id: 2,
+            title: "Modern Chat Interface",
+            content:
+                "Pre-built chat UI with streaming responses, file uploads, message history, and tool call visualization. Built with shadcn/ui and Tailwind CSS.",
+            image:
+                "https://images.unsplash.com/photo-1686170287433-c95faf6d3608?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzfHx8ZW58MHx8fHx8fA%3D%3D",
+        },
+        {
+            id: 3,
+            title: "User Authentication Ready",
+            content:
+                "Integrated Clerk authentication with email/password and OAuth support. User-scoped chat history with secure database persistence.",
+            image:
+                "https://images.unsplash.com/photo-1720378042271-60aff1e1c538?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxMHx8fGVufDB8fHx8fA%3D%3D",
+        },
+        {
+            id: 4,
+            title: "Built for Developers",
+            content:
+                "TypeScript, Next.js 15, AI SDK, Prisma, and PostgreSQL. Clean architecture, easy to customize, and production-ready from day one.",
+            image:
+                "https://images.unsplash.com/photo-1666882990322-e7f3b8df4f75?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D",
+        },
+    ],
+},
+

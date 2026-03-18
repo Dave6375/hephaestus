@@ -3,6 +3,8 @@ import { Navbar } from '@/components/sections/navbar'
 import { HeroSection } from '@/components/sections/hero-section'
 import { CompanyShowcase } from '@/components/sections/company-showcase'
 import {BentoSection} from "@/components/bento-section";
+import QuoteSection from "@/components/sections/quote-section";
+import {FeatureSection} from "@/components/sections/feature-section";
 
 const HomeSection = () => {
     /**
@@ -19,7 +21,9 @@ const HomeSection = () => {
                 <article className="w-full">
                     <HeroSection />
                     <CompanyShowcase />
-                    <BentoSection/>
+                    <BentoSection />
+                   <QuoteSection />
+                    <FeatureSection />
                 </article>
             </main>
           </div>
