@@ -5,6 +5,9 @@ import { CompanyShowcase } from '@/components/sections/company-showcase'
 import {BentoSection} from "@/components/bento-section";
 import QuoteSection from "@/components/sections/quote-section";
 import {FeatureSection} from "@/components/sections/feature-section";
+import {HypeSection} from "@/components/sections/hype-section";
+import {PricingSection} from "@/components/sections/pricing-section";
+import {CTASection} from "@/components/sections/cta-section";
 
 const HomeSection = () => {
     /**
@@ -24,6 +27,10 @@ const HomeSection = () => {
                     <BentoSection />
                    <QuoteSection />
                     <FeatureSection />
+                    <HypeSection />
+                    <PricingSection />
+                    <CTASection />
+
                 </article>
             </main>
           </div>

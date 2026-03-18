@@ -1,7 +1,7 @@
 "use client";
 
 import * as Accordion from "@radix-ui/react-accordion";
-import { motion, useInView } from "motion/react";
+import { useInView } from "motion/react";
 import React, {
     forwardRef,
     ReactNode,
@@ -194,6 +194,16 @@ export const Feature = ({
     // Replace the existing image rendering section with this optimized version
     const renderMedia = () => {
         const currentItem = featureItems[currentIndex];
+        const isForward =
+            previousIndex === -1 ||
+            currentIndex > previousIndex ||
+            (previousIndex === featureItems.length - 1 && currentIndex === 0);
+        const mediaAnimationClass =
+            previousIndex === -1
+                ? "animate-scale-in"
+                : isForward
+                    ? "animate-enter-from-right"
+                    : "animate-enter-from-left";
 
         if (!currentItem) {
             return (
@@ -203,7 +213,13 @@ export const Feature = ({
 
         if (currentItem.image) {
             return (
-                <div className="relative h-full w-full overflow-hidden">
+                <div
+                    key={`media-${currentItem.id}`}
+                    className={cn(
+                        "relative h-full w-full overflow-hidden rounded-xl border border-neutral-300/50 bg-white/60 p-1 shadow-[0px_1px_2px_-0.5px_rgba(0,0,0,0.08),0px_8px_24px_-12px_rgba(0,0,0,0.12)] dark:bg-white/5",
+                        mediaAnimationClass,
+                    )}
+                >
                     {/* Placeholder/Fallback */}
                     <div
                         className={cn(
@@ -214,30 +230,16 @@ export const Feature = ({
                     />
 
                     {/* Main Image */}
-                    <motion.img
-                        key={currentIndex}
+                    <img
                         src={currentItem.image}
                         alt={currentItem.title}
                         className={cn(
-                            "aspect-auto h-full w-full rounded-xl border border-neutral-300/50 object-cover p-1",
+                            "aspect-auto h-full w-full rounded-xl border border-neutral-300/50 object-cover",
                             "transition-all duration-300",
                             imageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-xl",
                         )}
-                        initial={{
-                            opacity: 0,
-                            filter: "blur(5px)",
-                        }}
-                        animate={{
-                            opacity: imageLoaded ? 1 : 0,
-                            filter: imageLoaded ? "blur(0px)" : "blur(5px)",
-                        }}
-                        transition={{
-                            duration: 0.3,
-                            ease: [0.4, 0, 0.2, 1],
-                        }}
                         onLoad={() => setImageLoaded(true)}
                         loading="eager"
-                        sizes="(max-width: 768px) 100vw, 50vw"
                     />
                 </div>
             );
@@ -245,15 +247,23 @@ export const Feature = ({
 
         if (currentItem.video) {
             return (
-                <video
-                    preload="auto"
-                    src={currentItem.video}
-                    className="aspect-auto h-full w-full rounded-lg object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline // Better mobile support
-                />
+                <div
+                    key={`media-${currentItem.id}`}
+                    className={cn(
+                        "h-full w-full overflow-hidden rounded-xl border border-neutral-300/50 bg-white/60 p-1 shadow-[0px_1px_2px_-0.5px_rgba(0,0,0,0.08),0px_8px_24px_-12px_rgba(0,0,0,0.12)] dark:bg-white/5",
+                        mediaAnimationClass,
+                    )}
+                >
+                    <video
+                        preload="auto"
+                        src={currentItem.video}
+                        className="aspect-auto h-full w-full rounded-lg object-cover"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                    />
+                </div>
             );
         }
 
@@ -284,7 +294,7 @@ export const Feature = ({
                                 <AccordionItem
                                     key={item.id}
                                     className={cn(
-                                        "relative rounded-lg data-[state=closed]:rounded-none data-[state=closed]:border-0 data-[state=open]:bg-white dark:data-[state=open]:bg-[#27272A]",
+                                        "relative rounded-lg data-[state=closed]:rounded-none data-[state=closed]:border-0 data-[state=open]:animate-scale-in data-[state=open]:bg-white dark:data-[state=open]:bg-[#27272A]",
                                         "dark:data-[state=open]:shadow-[0px_0px_0px_1px_rgba(249,250,251,0.06),0px_0px_0px_1px_var(--color-zinc-800,#27272A),0px_1px_2px_-0.5px_rgba(0,0,0,0.24),0px_2px_4px_-1px_rgba(0,0,0,0.24)]",
                                         "data-[state=open]:shadow-[0px_0px_1px_0px_rgba(0,0,0,0.16),0px_1px_2px_-0.5px_rgba(0,0,0,0.16)]",
                                     )}
