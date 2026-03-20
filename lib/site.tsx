@@ -100,6 +100,15 @@ export interface SiteConfig {
             video?: string;
         }[];
     };
+    footer: {
+        title: string;
+        description: string;
+        links: {
+            id: string;
+            name: string;
+            href: string;
+        }[];
+    };
 }
 
 export const siteConfig: SiteConfig = {
@@ -555,6 +564,40 @@ export const siteConfig: SiteConfig = {
         },
         subtext: "Referenced through Agentkit Starter",
     },
+    footerLink: [
+        {
+            title: "Company",
+            links: [
+                { id: 1, title: "About", url: "#" },
+                { id: 2, title: "Blog", url: "#" },
+                { id: 3, title: "Changelog", url: "#" },
+                { id: 4, title: "Contact", url: "#" },
+            ],
+        },
+        {
+            title: "Product",
+            links: [
+                { id: 5, title: "Documentation", url: "#" },
+                { id: 6, title: "Examples", url: "#" },
+                {
+                    id: 7,
+                    title: "GitHub",
+                    url: "https://github.com/anayatkhan1/agentkit-starter",
+                },
+                { id: 8, title: "Demo", url: "/chat" },
+            ],
+        },
+        {
+            title: "Resources",
+            links: [
+                { id: 9, title: "Getting Started", url: "#" },
+                { id: 10, title: "API Reference", url: "#" },
+                { id: 11, title: "Community", url: "#" },
+                { id: 12, title: "Support", url: "#" },
+            ],
+        },
+    ],
+},
     featureSection: {
         title: "What This Autonomous AI Can Do",
         description:
