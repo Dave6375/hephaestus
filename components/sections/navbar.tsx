@@ -7,6 +7,7 @@
  */
 import { useScroll, motion, AnimatePresence, Variants } from 'framer-motion';
 import React, {useEffect} from "react";
+import { Show, UserButton } from "@clerk/nextjs";
 import {siteConfig} from "@/lib/site";
 import {cn} from "@/lib/utils";
 import { Icons } from '@/components/icons';
@@ -124,11 +125,21 @@ export function Navbar() {
 
                         <div className='flex shrink-0 flex-row items-center gap-1 px-4 md:gap-3'>
                             <div className='flex items-center space-x-6'>
-                                <Link className='hidden h-10 items-center justify-center rounded-full bg-primary px-6 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all hover:bg-primary/90 hover:scale-105 hover:shadow-lg active:scale-95 md:flex'
-                                      href='/chat'
-                                      >
-                                    Try for free
-                                </Link>
+                                <Show when="signed-in">
+                                    <Link className='hidden h-10 items-center justify-center rounded-full bg-primary px-6 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all hover:bg-primary/90 hover:scale-105 hover:shadow-lg active:scale-95 md:flex'
+                                          href='/chat'
+                                    >
+                                        Go to Chat
+                                    </Link>
+                                    <UserButton />
+                                </Show>
+                                <Show when="signed-out">
+                                    <Link className='hidden h-10 items-center justify-center rounded-full bg-primary px-6 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all hover:bg-primary/90 hover:scale-105 hover:shadow-lg active:scale-95 md:flex'
+                                          href='/chat'
+                                    >
+                                        Try for free
+                                    </Link>
+                                </Show>
                             </div>
                             <ThemeToggle />
                             <button
@@ -175,7 +186,7 @@ export function Navbar() {
                                     <Link href="/" className="flex items-center gap-3">
                                         <Icons.logo className="size-7 md:size-10" />
                                         <p className="font-semibold text-lg text-primary">
-                                            AgentKit
+                                            {siteConfig.name}
                                         </p>
                                     </Link>
                                     <button
@@ -222,12 +233,22 @@ export function Navbar() {
 
                                 {/* Action buttons */}
                                 <div className="flex flex-col gap-2">
-                                    <Link
-                                        href="/chat"
-                                        className="flex h-10 w-full items-center justify-center rounded-full bg-primary px-4 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all active:scale-95"
-                                    >
-                                        Try for free
-                                    </Link>
+                                    <Show when="signed-in">
+                                        <Link
+                                            href="/chat"
+                                            className="flex h-10 w-full items-center justify-center rounded-full bg-primary px-4 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all active:scale-95 text-center"
+                                        >
+                                            Go to Chat
+                                        </Link>
+                                    </Show>
+                                    <Show when="signed-out">
+                                        <Link
+                                            href="/chat"
+                                            className="flex h-10 w-full items-center justify-center rounded-full bg-primary px-4 font-medium text-primary-foreground text-sm tracking-wide shadow-md transition-all active:scale-95 text-center"
+                                        >
+                                            Try for free
+                                        </Link>
+                                    </Show>
                                 </div>
                             </div>
                         </motion.div>

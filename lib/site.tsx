@@ -100,6 +100,23 @@ export interface SiteConfig {
             video?: string;
         }[];
     };
+    footerLinks: {
+        title: string;
+        links: {
+            id: number;
+            title: string;
+            url: string;
+        }[];
+    }[];
+    footer: {
+        title: string;
+        description: string;
+        links: {
+            id: string;
+            name: string;
+            href: string;
+        }[];
+    };
 }
 
 export const siteConfig: SiteConfig = {
@@ -139,7 +156,7 @@ export const siteConfig: SiteConfig = {
     bentoSection: {
         title: "Powerful Features Out of the Box",
         description:
-            "AgentKit includes everything you need-no need to build from scratch",
+            "Hephaestus includes everything you need-no need to build from scratch",
         items: [
             {
                 id: 1,
@@ -553,7 +570,48 @@ export const siteConfig: SiteConfig = {
             text: "Lets get Started",
             href: "/chat",
         },
-        subtext: "Referenced through Agentkit Starter",
+        subtext: "Referenced through Hephaestus Starter",
+    },
+    footerLinks: [
+        {
+            title: "Company",
+            links: [
+                { id: 1, title: "About", url: "#" },
+                { id: 2, title: "Blog", url: "#" },
+                { id: 3, title: "Changelog", url: "#" },
+                { id: 4, title: "Contact", url: "#" },
+            ],
+        },
+        {
+            title: "Product",
+            links: [
+                { id: 5, title: "Documentation", url: "#" },
+                { id: 6, title: "Examples", url: "#" },
+                {
+                    id: 7,
+                    title: "GitHub",
+                    url: "https://github.com/anayatkhan1/agentkit-starter",
+                },
+                { id: 8, title: "Demo", url: "/chat" },
+            ],
+        },
+        {
+            title: "Resources",
+            links: [
+                { id: 9, title: "Getting Started", url: "#" },
+                { id: 10, title: "API Reference", url: "#" },
+                { id: 11, title: "Community", url: "#" },
+                { id: 12, title: "Support", url: "#" },
+            ],
+        },
+    ],
+    footer: {
+        title: "Hephaestus",
+        description: "The Ultimate AI 3D Asset Pipeline",
+        links: [
+            { id: "1", name: "Terms", href: "#" },
+            { id: "2", name: "Privacy", href: "#" },
+        ],
     },
     featureSection: {
         title: "What This Autonomous AI Can Do",

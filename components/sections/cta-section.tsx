@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { Show } from "@clerk/nextjs";
 import { siteConfig } from "@/lib/site";
 
 export function CTASection() {
@@ -24,12 +27,22 @@ export function CTASection() {
                             {ctaSection.title}
                         </h1>
                         <div className="mt-10 flex flex-col items-center justify-center gap-3">
-                            <Link
-                                href={ctaSection.button.href}
-                                className="flex h-11 w-fit items-center justify-center rounded-full border border-white/25 bg-white px-5 font-semibold text-primary text-sm shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_8px_24px_-12px_rgba(0,0,0,0.35)] transition-colors hover:bg-white/90"
-                            >
-                                {ctaSection.button.text}
-                            </Link>
+                            <Show when="signed-in">
+                                <Link
+                                    href="/chat"
+                                    className="flex h-11 w-fit items-center justify-center rounded-full border border-white/25 bg-white px-5 font-semibold text-primary text-sm shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_8px_24px_-12px_rgba(0,0,0,0.35)] transition-colors hover:bg-white/90"
+                                >
+                                    Go to Chat
+                                </Link>
+                            </Show>
+                            <Show when="signed-out">
+                                <Link
+                                    href={ctaSection.button.href}
+                                    className="flex h-11 w-fit items-center justify-center rounded-full border border-white/25 bg-white px-5 font-semibold text-primary text-sm shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_8px_24px_-12px_rgba(0,0,0,0.35)] transition-colors hover:bg-white/90"
+                                >
+                                    {ctaSection.button.text}
+                                </Link>
+                            </Show>
                             <span className="text-sm text-primary-foreground/80">{ctaSection.subtext}</span>
                         </div>
                     </div>

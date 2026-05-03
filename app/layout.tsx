@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { GeistMono } from "geist/font/mono";
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/lib/site";
 import { metadata as siteMetadata } from "./metadata";
 import "./globals.css";
@@ -31,7 +32,9 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
             >
-                {children}
+                <TooltipProvider>
+                    {children}
+                </TooltipProvider>
             </ThemeProvider>
             </body>
             </html>
