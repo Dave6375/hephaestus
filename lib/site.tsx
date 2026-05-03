@@ -100,6 +100,14 @@ export interface SiteConfig {
             video?: string;
         }[];
     };
+    footerLinks: {
+        title: string;
+        links: {
+            id: number;
+            title: string;
+            url: string;
+        }[];
+    }[];
     footer: {
         title: string;
         description: string;
@@ -148,7 +156,7 @@ export const siteConfig: SiteConfig = {
     bentoSection: {
         title: "Powerful Features Out of the Box",
         description:
-            "AgentKit includes everything you need-no need to build from scratch",
+            "Hephaestus includes everything you need-no need to build from scratch",
         items: [
             {
                 id: 1,
@@ -562,9 +570,9 @@ export const siteConfig: SiteConfig = {
             text: "Lets get Started",
             href: "/chat",
         },
-        subtext: "Referenced through Agentkit Starter",
+        subtext: "Referenced through Hephaestus Starter",
     },
-    footerLink: [
+    footerLinks: [
         {
             title: "Company",
             links: [
@@ -597,7 +605,14 @@ export const siteConfig: SiteConfig = {
             ],
         },
     ],
-},
+    footer: {
+        title: "Hephaestus",
+        description: "The Ultimate AI 3D Asset Pipeline",
+        links: [
+            { id: "1", name: "Terms", href: "#" },
+            { id: "2", name: "Privacy", href: "#" },
+        ],
+    },
     featureSection: {
         title: "What This Autonomous AI Can Do",
         description:

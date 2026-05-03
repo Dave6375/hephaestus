@@ -75,10 +75,10 @@ export async function loadChat(
 		});
 
 		// Convert database messages back to UIMessage format
-		return messages.map((msg) => {
-			// Prisma returns JsonValue, we need to cast it properly
-			const content = msg.content as unknown;
-			return content as UIMessage;
+		return messages.map((msg: any) => {
+				// Prisma returns JsonValue, we need to cast it properly
+				const content = msg.content as unknown;
+				return content as UIMessage;
 		});
 	} catch (error) {
 		// Log error but don't throw - return empty array for non-existent chats
@@ -103,7 +103,7 @@ export async function saveChat({
 	validateMessages(messages);
 
 	try {
-		// Verify chat exists and belongs to user (if userId provided)
+		// Ensure chat exists and belongs to user (if userId provided)
 		if (userId) {
 			const chat = await prisma.chat.findUnique({
 				where: { id: chatId },
@@ -111,24 +111,30 @@ export async function saveChat({
 			});
 
 			if (!chat) {
-				throw new Error(`Chat ${chatId} not found`);
-			}
-
-			if (chat.userId !== userId) {
+				// If chat doesn't exist, create it (handles potential race conditions or manual navigation)
+				console.log(`[Chat Store] Chat ${chatId} not found, creating it for user ${userId}`);
+				await prisma.chat.create({
+					data: {
+						id: chatId,
+						userId,
+						title: generateChatTitle(messages),
+					},
+				});
+			} else if (chat.userId !== userId) {
 				throw new Error("Unauthorized: Chat does not belong to user");
 			}
 		}
 
 		// Use a transaction to ensure atomicity
 		// This ensures all operations succeed or fail together
-		await prisma.$transaction(async (tx) => {
+		await prisma.$transaction(async (tx: any) => {
 			// Get existing message IDs for this chat to determine what needs to be updated vs created
 			const existingMessages = await tx.message.findMany({
 				where: { chatId },
 				select: { id: true },
 			});
-			const existingMessageIds = new Set(existingMessages.map((m) => m.id));
-			const currentMessageIds = new Set(messages.map((m) => m.id));
+			const existingMessageIds = new Set(existingMessages.map((m: any) => m.id));
+			const currentMessageIds = new Set(messages.map((m: any) => m.id));
 
 			// Separate messages into new and existing for batch operations
 			const messagesToCreate: Array<{
@@ -306,8 +312,8 @@ export async function listChats(userId: string): Promise<ChatMetadata[]> {
 		});
 
 		return chats
-			.filter((chat) => chat._count.messages > 0) // Only return chats with messages
-			.map((chat) => {
+			.filter((chat: any) => chat._count.messages > 0) // Only return chats with messages
+			.map((chat: any) => {
 				const lastMessage = chat.messages[0];
 				const lastMessageContent = lastMessage
 					? (lastMessage.content as unknown as UIMessage)
@@ -352,5 +358,46 @@ export async function getChatTitle(
 	} catch (error) {
 		console.error(`Failed to get chat title for ${id}:`, error);
 		return "Chat";
+	}
+}
+
+/**
+ * Get the most recent chat for a user that has no messages.
+ * This helps prevent creating multiple empty "orphan" chats.
+ * @param userId - Clerk user ID
+ * @returns Chat ID or null if none found
+ */
+export async function getRecentChatWithoutMessages(
+	userId: string,
+): Promise<string | null> {
+	if (!userId) {
+		return null;
+	}
+
+	try {
+		// Find chats for this user that have no messages
+		// and were updated recently
+		const emptyChat = await prisma.chat.findFirst({
+			where: {
+				userId,
+				messages: {
+					none: {},
+				},
+			},
+			orderBy: {
+				updatedAt: "desc",
+			},
+			select: {
+				id: true,
+			},
+		});
+
+		return emptyChat?.id || null;
+	} catch (error) {
+		console.error(
+			`Failed to find empty chat for user ${userId}:`,
+			error,
+		);
+		return null;
 	}
 }

@@ -16,21 +16,11 @@ export function FooterSection() {
 				<div className="mx-0 flex max-w-xs flex-col items-start justify-start gap-y-5">
 					<Link href="/" className="flex items-center gap-2">
 						<Icons.logo className="size-8" />
-						<p className="font-semibold text-primary text-xl">AgentKit</p>
+						<p className="font-semibold text-primary text-xl">{siteConfig.footer.title}</p>
 					</Link>
 					<p className="font-medium text-muted-foreground tracking-tight">
 						{siteConfig.hero.description}
 					</p>
-					<div className="flex items-center gap-2 dark:hidden">
-						<Icons.soc2 className="size-12" />
-						<Icons.hipaa className="size-12" />
-						<Icons.gdpr className="size-12" />
-					</div>
-					<div className="hidden items-center gap-2 dark:flex">
-						<Icons.soc2Dark className="size-12" />
-						<Icons.hipaaDark className="size-12" />
-						<Icons.gdprDark className="size-12" />
-					</div>
 				</div>
 				<div className="pt-5 md:w-1/2">
 					<div className="flex flex-col items-start justify-start gap-y-5 md:flex-row md:items-center md:justify-between lg:pl-10">
@@ -57,10 +47,8 @@ export function FooterSection() {
 			</div>
 			<div className="relative z-0 mt-24 h-48 w-full md:h-64">
 				<div className="absolute inset-0 z-10 bg-gradient-to-t from-40% from-transparent to-background" />
-				<div className="absolute inset-0 mx-6">
+				<div className="absolute inset-0 mx-6 flex items-center justify-center">
 					<FlickeringGrid
-						text={tablet ? "AgentKit" : "Streamline your workflow"}
-						fontSize={tablet ? 70 : 90}
 						className="h-full w-full"
 						squareSize={2}
 						gridGap={tablet ? 2 : 3}
@@ -68,6 +56,9 @@ export function FooterSection() {
 						maxOpacity={0.3}
 						flickerChance={0.1}
 					/>
+					<h2 className="pointer-events-none absolute font-bold text-6xl text-muted-foreground/20 uppercase md:text-8xl">
+						{tablet ? siteConfig.footer.title : "Streamline your workflow"}
+					</h2>
 				</div>
 			</div>
 		</footer>

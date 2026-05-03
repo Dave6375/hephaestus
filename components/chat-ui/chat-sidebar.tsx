@@ -19,6 +19,7 @@ import type { ChatMetadata } from "@/lib/chat-store";
 import { Icons } from "../icons";
 import { ThemeToggle } from "../theme-toggle";
 import { NavUser } from "./nav-user";
+import { siteConfig } from "@/lib/site";
 
 // Group chats by time periods
 function groupChatsByPeriod(chats: ChatMetadata[]) {
@@ -101,7 +102,7 @@ export function ChatSidebar({ currentChatId }: { currentChatId?: string }) {
 						<Link href="/" className="flex flex-row items-center gap-2">
 							<Icons.logo className="size-8" />
 							<span className="font-base text-md text-primary tracking-tight">
-								AgentKit
+								{siteConfig.name}
 							</span>
 						</Link>
 					</div>

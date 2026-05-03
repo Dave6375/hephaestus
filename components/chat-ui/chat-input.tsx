@@ -1,4 +1,4 @@
-import { UIDataTypes, UIMessagePart, UITools } from "ai";
+import { type UIDataTypes, type UIMessagePart, type UITools } from "ai";
 import {
 	ArrowUp,
 	Globe,
@@ -21,6 +21,8 @@ interface ChatInputProps {
 	isLoading: boolean;
 	stop: () => void;
 	onSubmit: (message: { parts: UIMessagePart<UIDataTypes, UITools>[] }) => void;
+	searchMode: boolean;
+	onSearchModeChange: (enabled: boolean) => void;
 	className?: string;
 }
 
@@ -28,11 +30,12 @@ export function ChatInput({
 	isLoading,
 	stop,
 	onSubmit,
+	searchMode,
+	onSearchModeChange,
 	className,
 }: ChatInputProps) {
 	const [input, setInput] = useState("");
 	const [files, setFiles] = useState<File[]>([]);
-	const [searchMode, setSearchMode] = useState(false);
 	const uploadInputRef = useRef<HTMLInputElement>(null);
 
 	const fileToDataURL = (file: File) =>
@@ -49,6 +52,11 @@ export function ChatInput({
 		const text = input?.trim();
 
 		if (!text && files.length === 0) return;
+
+		// Save state before clearing for potential restoration on error
+		const previousInput = input;
+		const previousFiles = [...files];
+		const previousUploadValue = uploadInputRef.current?.value || "";
 
 		// clear input optimistically
 		setInput("");
@@ -71,19 +79,17 @@ export function ChatInput({
 				});
 			}
 
-			// Pass searchMode as metadata in the message
 			onSubmit({
 				parts,
-				// Add searchMode as a custom property that will be passed through
-				searchMode,
-			} as {
-				parts: Array<UIMessagePart<UIDataTypes, UITools>>;
-				searchMode: boolean;
 			});
 		} catch (err) {
 			console.error("Failed to process message:", err);
 			// Restore input if error occurs (optional, but good UX)
-			if (text) setInput(text);
+			setInput(previousInput);
+			setFiles(previousFiles);
+			if (uploadInputRef.current) {
+				uploadInputRef.current.value = previousUploadValue;
+			}
 		}
 	};
 
@@ -170,7 +176,7 @@ export function ChatInput({
 									<Button
 										variant={searchMode ? "default" : "outline"}
 										className="rounded-full"
-										onClick={() => setSearchMode(!searchMode)}
+										onClick={() => onSearchModeChange(!searchMode)}
 										type="button"
 									>
 										<Globe size={18} />

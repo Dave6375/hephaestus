@@ -1,8 +1,8 @@
 "use client";
 
-import { type UIMessage, useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useMemo } from "react";
+import { useChat } from "@ai-sdk/react";
+import { type UIMessage, type UIDataTypes, type UIMessagePart, type UITools } from "ai";
+import { useMemo, useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ChatInput } from "./chat-input";
 import { ChatStream } from "./chat-stream";
@@ -53,28 +53,24 @@ export function ChatContent({
 	id?: string;
 	initialMessages?: UIMessage[];
 }) {
+	const [searchMode, setSearchMode] = useState(false);
+
 	// useChat provides streaming state and messages
 	const { messages, sendMessage, status, stop } = useChat({
 		id,
 		messages: initialMessages,
-		// Optimize: only send the last message to the server
-		// The server will load previous messages from storage
-		transport: new DefaultChatTransport({
-			api: "/api/chat",
-			prepareSendMessagesRequest({ messages, id }) {
-				const lastMessage = messages[messages.length - 1];
-				// Extract searchMode from message metadata if present
-				const searchMode = (lastMessage as any).searchMode ?? false;
-				return {
-					body: {
-						message: lastMessage, // Only send last message
-						id,
-						searchMode, // Pass searchMode to API
-					},
-				};
-			},
-		}),
 	});
+
+	// Wrapper for sendMessage to match expected ChatInput onSubmit signature
+	const handleSubmit = async (data: { parts: UIMessagePart<UIDataTypes, UITools>[] }) => {
+		await sendMessage({
+			role: "user",
+			id: `user-${Date.now()}`,
+			parts: data.parts,
+		}, {
+			body: { searchMode }
+		});
+	};
 
 	// Derive loading state from SDK status
 	const isLoading = status === "submitted" || status === "streaming";
@@ -96,7 +92,9 @@ export function ChatContent({
 			<ChatInput
 				isLoading={isLoading}
 				stop={stop}
-				onSubmit={sendMessage}
+				onSubmit={handleSubmit}
+				searchMode={searchMode}
+				onSearchModeChange={setSearchMode}
 				className="z-10 shrink-0 bg-background px-3 pb-3 md:px-5 md:pb-5"
 			/>
 		</main>

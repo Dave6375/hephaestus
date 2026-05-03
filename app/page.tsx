@@ -8,6 +8,7 @@ import {FeatureSection} from "@/components/sections/feature-section";
 import {HypeSection} from "@/components/sections/hype-section";
 import {PricingSection} from "@/components/sections/pricing-section";
 import {CTASection} from "@/components/sections/cta-section";
+import {FooterSection} from "@/components/sections/footer-section";
 
 const HomeSection = () => {
     /**
@@ -30,6 +31,7 @@ const HomeSection = () => {
                     <HypeSection />
                     <PricingSection />
                     <CTASection />
+                    <FooterSection />
 
                 </article>
             </main>

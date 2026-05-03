@@ -1,4 +1,4 @@
-import { UIMessage } from "ai";
+import { type UIMessage } from "ai";
 import {
 	Check,
 	Copy,
@@ -37,14 +37,18 @@ interface ChatStreamProps {
 type MessagePart = NonNullable<UIMessage["parts"]>[number];
 
 type WebSearchToolCall = MessagePart & {
-	type: "tool-webSearch";
+	type: string;
 	toolCallId?: string;
+	toolName?: string;
+	args?: { query?: string };
 	input?: { query?: string };
 };
 
 type WebSearchToolResult = MessagePart & {
-	type: "tool-webSearch";
+	type: string;
 	toolCallId?: string;
+	toolName?: string;
+	result?: unknown;
 	output?: unknown;
 };
 
@@ -98,41 +102,7 @@ function CopyAction({
 
 // Helper function to extract web search tool calls and results
 function extractWebSearchTools(message: UIMessage) {
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:98",
-			message: "extractWebSearchTools entry",
-			data: {
-				hasParts: !!message.parts,
-				partsLength: message.parts?.length || 0,
-				role: message.role,
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "A",
-		}),
-	}).catch(() => {});
-	// #endregion
 	if (!message.parts) {
-		// #region agent log
-		fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				location: "chat-stream.tsx:100",
-				message: "No parts array found",
-				data: { role: message.role },
-				timestamp: Date.now(),
-				sessionId: "debug-session",
-				runId: "run1",
-				hypothesisId: "E",
-			}),
-		}).catch(() => {});
-		// #endregion
 		return { toolCalls: [], toolResults: [] };
 	}
 
@@ -147,117 +117,17 @@ function extractWebSearchTools(message: UIMessage) {
 	const duplicateIds = toolCallIdsInParts.filter(
 		(id, index) => toolCallIdsInParts.indexOf(id) !== index,
 	);
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:105",
-			message: "Parts array details",
-			data: {
-				partsLength: parts.length,
-				partTypes: parts.map((p) => ({
-					type: (p as { type?: string }).type,
-					toolCallId: (p as { toolCallId?: string }).toolCallId,
-				})),
-				toolWebSearchCount: toolWebSearchParts.length,
-				toolCallIdsInParts,
-				duplicateIds,
-				hasDuplicates: duplicateIds.length > 0,
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "A",
-		}),
-	}).catch(() => {});
-	// #endregion
 
 	const toolCalls = parts.filter((part): part is WebSearchToolCall => {
 		const partType = (part as { type?: string }).type;
-		// Log full part structure for debugging
-		const partKeys = Object.keys(part);
-		const partData = partKeys.reduce(
-			(acc, key) => {
-				const value = (part as Record<string, unknown>)[key];
-				// Only log primitive values or short strings to avoid huge logs
-				if (
-					typeof value === "string" ||
-					typeof value === "number" ||
-					typeof value === "boolean" ||
-					value === null ||
-					value === undefined
-				) {
-					acc[key] = value;
-				} else if (typeof value === "object" && value !== null) {
-					acc[key] = Array.isArray(value)
-						? `[Array(${value.length})]`
-						: `[Object(${Object.keys(value).length} keys)]`;
-				}
-				return acc;
-			},
-			{} as Record<string, unknown>,
-		);
-		// #region agent log
-		fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				location: "chat-stream.tsx:110",
-				message: "Filtering tool call part - full structure",
-				data: { partType, partKeys, partData },
-				timestamp: Date.now(),
-				sessionId: "debug-session",
-				runId: "run1",
-				hypothesisId: "B",
-			}),
-		}).catch(() => {});
-		// #endregion
-		// Tool calls have type "tool-webSearch" and contain args
-		if (partType !== "tool-webSearch") return false;
-		// Check for args property - it might be nested or have different structure
-		const hasArgs = "args" in part || "input" in part || "query" in part;
-		// #region agent log
-		fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				location: "chat-stream.tsx:120",
-				message: "Tool call check result",
-				data: {
-					partType,
-					hasArgs,
-					hasInput: "input" in part,
-					hasQuery: "query" in part,
-				},
-				timestamp: Date.now(),
-				sessionId: "debug-session",
-				runId: "run1",
-				hypothesisId: "B",
-			}),
-		}).catch(() => {});
-		// #endregion
-		return hasArgs;
+		const toolName = (part as { toolName?: string }).toolName;
+		
+		// Match either "tool-webSearch" or "tool-call" with toolName "webSearch"
+		if (partType === "tool-webSearch") return true;
+		if (partType === "tool-call" && toolName === "webSearch") return true;
+		
+		return false;
 	});
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:115",
-			message: "Tool calls extracted",
-			data: {
-				toolCallsCount: toolCalls.length,
-				toolCallIds: toolCalls.map((tc) => tc.toolCallId),
-				toolCallInputs: toolCalls.map((tc) => tc.input),
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "B",
-		}),
-	}).catch(() => {});
-	// #endregion
 
 	// Deduplicate tool calls by toolCallId (in case same tool call appears multiple times during streaming)
 	const toolCallMap = new Map<string, WebSearchToolCall>();
@@ -267,166 +137,25 @@ function extractWebSearchTools(message: UIMessage) {
 		}
 	});
 	const uniqueToolCalls = Array.from(toolCallMap.values());
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:147",
-			message: "Deduplication result",
-			data: {
-				originalCount: toolCalls.length,
-				uniqueCount: uniqueToolCalls.length,
-				originalIds: toolCalls.map((tc) => tc.toolCallId),
-				uniqueIds: uniqueToolCalls.map((tc) => tc.toolCallId),
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "B",
-		}),
-	}).catch(() => {});
-	// #endregion
 
 	const toolCallIds = new Set<string>(
 		uniqueToolCalls
 			.map((tc) => tc.toolCallId)
 			.filter((id): id is string => Boolean(id)),
 	);
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:123",
-			message: "Tool call IDs set",
-			data: {
-				toolCallIdsCount: toolCallIds.size,
-				toolCallIds: Array.from(toolCallIds),
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "D",
-		}),
-	}).catch(() => {});
-	// #endregion
 
 	const toolResults = parts.filter((part): part is WebSearchToolResult => {
 		const partType = (part as { type?: string }).type;
+		const toolName = (part as { toolName?: string }).toolName;
 		const { toolCallId } = part as { toolCallId?: string };
-		// Log full part structure for debugging
-		const partKeys = Object.keys(part);
-		const partData = partKeys.reduce(
-			(acc, key) => {
-				const value = (part as Record<string, unknown>)[key];
-				// Only log primitive values or short strings to avoid huge logs
-				if (
-					typeof value === "string" ||
-					typeof value === "number" ||
-					typeof value === "boolean" ||
-					value === null ||
-					value === undefined
-				) {
-					acc[key] = value;
-				} else if (typeof value === "object" && value !== null) {
-					acc[key] = Array.isArray(value)
-						? `[Array(${value.length})]`
-						: `[Object(${Object.keys(value).length} keys)]`;
-				}
-				return acc;
-			},
-			{} as Record<string, unknown>,
-		);
-		// #region agent log
-		fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				location: "chat-stream.tsx:130",
-				message: "Filtering tool result part - full structure",
-				data: { partType, toolCallId, partKeys, partData },
-				timestamp: Date.now(),
-				sessionId: "debug-session",
-				runId: "run1",
-				hypothesisId: "D",
-			}),
-		}).catch(() => {});
-		// #endregion
-		// Tool results have type "tool-webSearch" and contain result (and optionally toolCallId)
-		// Check for result property - it might be nested or have different structure
-		const hasResult = "result" in part || "output" in part || "content" in part;
+
 		const matches =
-			partType === "tool-webSearch" &&
-			hasResult &&
+			(partType === "tool-webSearch" || (partType === "tool-result" && toolName === "webSearch")) &&
 			typeof toolCallId === "string" &&
 			toolCallIds.has(toolCallId);
-		// #region agent log
-		fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				location: "chat-stream.tsx:145",
-				message: "Tool result check result",
-				data: {
-					partType,
-					toolCallId,
-					hasResult,
-					hasOutput: "output" in part,
-					hasContent: "content" in part,
-					isToolWebSearch: partType === "tool-webSearch",
-					hasMatchingId:
-						typeof toolCallId === "string" && toolCallIds.has(toolCallId),
-					matches,
-				},
-				timestamp: Date.now(),
-				sessionId: "debug-session",
-				runId: "run1",
-				hypothesisId: "D",
-			}),
-		}).catch(() => {});
-		// #endregion
 		return matches;
 	});
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:136",
-			message: "Tool results extracted",
-			data: {
-				toolResultsCount: toolResults.length,
-				toolResultIds: toolResults.map((tr) => tr.toolCallId),
-				hasResults: toolResults.length > 0,
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "D",
-		}),
-	}).catch(() => {});
-	// #endregion
 
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:138",
-			message: "extractWebSearchTools exit",
-			data: {
-				toolCallsCount: uniqueToolCalls.length,
-				toolResultsCount: toolResults.length,
-				originalCount: toolCalls.length,
-			},
-			timestamp: Date.now(),
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "A",
-		}),
-	}).catch(() => {});
-	// #endregion
 	return { toolCalls: uniqueToolCalls, toolResults };
 }
 
@@ -437,7 +166,7 @@ function ToolCallUI({
 	isStreaming,
 }: {
 	searchQuery: string;
-	searchResults: WebSearchResultItem[];
+	searchResults: any[];
 	isStreaming: boolean;
 }) {
 	return (
@@ -452,11 +181,13 @@ function ToolCallUI({
 								<StepsItem>Top matches</StepsItem>
 								<div className="flex flex-wrap gap-1.5">
 									{searchResults.map((result, resultIndex) => {
+										// EXA specific field mapping
 										const url = result.url || result.link || "";
 										const title = result.title || result.name || url;
 										const content =
-											result.content ||
 											result.text ||
+											result.highlights?.[0] ||
+											result.content ||
 											result.snippet ||
 											result.description ||
 											"";
@@ -494,18 +225,18 @@ function ToolCallUI({
 	);
 }
 
-function normalizeResults(resultData: unknown): WebSearchResultItem[] {
-	if (Array.isArray(resultData)) return resultData as WebSearchResultItem[];
+function normalizeResults(resultData: unknown): any[] {
+	if (Array.isArray(resultData)) return resultData as any[];
 
 	if (resultData && typeof resultData === "object") {
 		const asObject = resultData as { results?: unknown; content?: unknown };
 
 		if (Array.isArray(asObject.results)) {
-			return asObject.results as WebSearchResultItem[];
+			return asObject.results as any[];
 		}
 
 		if (Array.isArray(asObject.content)) {
-			return asObject.content as WebSearchResultItem[];
+			return asObject.content as any[];
 		}
 	}
 
@@ -513,57 +244,12 @@ function normalizeResults(resultData: unknown): WebSearchResultItem[] {
 }
 
 export function ChatStream({ messages }: ChatStreamProps) {
-	// #region agent log
-	fetch("http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			location: "chat-stream.tsx:222",
-			message: "ChatStream render",
-			data: {
-				totalMessages: messages.length,
-				messageIds: messages.map((m) => m.id),
-				duplicateIds: messages
-					.map((m) => m.id)
-					.filter((id, idx, arr) => arr.indexOf(id) !== idx),
-			},
-			sessionId: "debug-session",
-			runId: "run1",
-			hypothesisId: "F",
-		}),
-	}).catch(() => {});
-	// #endregion
-
 	return (
 		<ChatContainerRoot className="h-full">
 			<ChatContainerContent className="space-y-0 px-5 py-12">
 				{messages.map((message, index) => {
 					const isAssistant = message.role === "assistant";
 					const isLastMessage = index === messages.length - 1;
-
-					// #region agent log
-					fetch(
-						"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-						{
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								location: "chat-stream.tsx:222",
-								message: "Rendering message",
-								data: {
-									messageId: message.id,
-									index,
-									role: message.role,
-									partsLength: message.parts?.length || 0,
-									totalMessages: messages.length,
-								},
-								sessionId: "debug-session",
-								runId: "run1",
-								hypothesisId: "F",
-							}),
-						},
-					).catch(() => {});
-					// #endregion
 
 					const textParts =
 						message.parts?.filter((part) => part.type === "text") || [];
@@ -601,32 +287,6 @@ export function ChatStream({ messages }: ChatStreamProps) {
 					const messageContent =
 						textParts.map((part) => part.text).join("") || "";
 
-					// #region agent log
-					fetch(
-						"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-						{
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								location: "chat-stream.tsx:242",
-								message: "Message streaming check",
-								data: {
-									messageId: message.id,
-									isLastMessage,
-									hasStreamingText,
-									allTextPartsDone,
-									isMessageStreaming,
-									textPartStates,
-									textPartsCount: textParts.length,
-								},
-								sessionId: "debug-session",
-								runId: "run1",
-								hypothesisId: "F",
-							}),
-						},
-					).catch(() => {});
-					// #endregion
-
 					// Extract web search tool calls and results
 					const { toolCalls, toolResults } = extractWebSearchTools(message);
 
@@ -634,102 +294,14 @@ export function ChatStream({ messages }: ChatStreamProps) {
 					const seenToolCallIds = new Set<string>();
 					const finalToolCalls = toolCalls.filter((tc) => {
 						if (!tc.toolCallId) {
-							// #region agent log
-							fetch(
-								"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-								{
-									method: "POST",
-									headers: { "Content-Type": "application/json" },
-									body: JSON.stringify({
-										location: "chat-stream.tsx:250",
-										message: "Filtering tool call without ID",
-										data: { messageId: message.id },
-										sessionId: "debug-session",
-										runId: "run1",
-										hypothesisId: "F",
-									}),
-								},
-							).catch(() => {});
-							// #endregion
 							return false;
 						}
 						if (seenToolCallIds.has(tc.toolCallId)) {
-							// #region agent log
-							fetch(
-								"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-								{
-									method: "POST",
-									headers: { "Content-Type": "application/json" },
-									body: JSON.stringify({
-										location: "chat-stream.tsx:255",
-										message: "Filtering duplicate tool call",
-										data: {
-											messageId: message.id,
-											toolCallId: tc.toolCallId,
-											seenIds: Array.from(seenToolCallIds),
-										},
-										sessionId: "debug-session",
-										runId: "run1",
-										hypothesisId: "F",
-									}),
-								},
-							).catch(() => {});
-							// #endregion
 							return false;
 						}
 						seenToolCallIds.add(tc.toolCallId);
 						return true;
 					});
-					// #region agent log
-					fetch(
-						"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-						{
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								location: "chat-stream.tsx:264",
-								message: "Final tool calls after deduplication",
-								data: {
-									messageId: message.id,
-									originalCount: toolCalls.length,
-									finalCount: finalToolCalls.length,
-									originalIds: toolCalls.map((tc) => tc.toolCallId),
-									finalIds: finalToolCalls.map((tc) => tc.toolCallId),
-								},
-								sessionId: "debug-session",
-								runId: "run1",
-								hypothesisId: "F",
-							}),
-						},
-					).catch(() => {});
-					// #endregion
-
-					// #region agent log
-					fetch(
-						"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-						{
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								location: "chat-stream.tsx:162",
-								message: "After extraction in render",
-								data: {
-									messageId: message.id,
-									index,
-									isAssistant,
-									toolCallsCount: finalToolCalls.length,
-									originalCount: toolCalls.length,
-									toolResultsCount: toolResults.length,
-									willRender: finalToolCalls.length > 0,
-									toolCallIds: finalToolCalls.map((tc) => tc.toolCallId),
-								},
-								sessionId: "debug-session",
-								runId: "run1",
-								hypothesisId: "F",
-							}),
-						},
-					).catch(() => {});
-					// #endregion
 
 					// Ensure unique key - use id if available, otherwise fallback to index
 					const messageKey = message.id || `message-${index}-${message.role}`;
@@ -761,30 +333,6 @@ export function ChatStream({ messages }: ChatStreamProps) {
 											key={`toolcalls-${message.id || index}`}
 										>
 											{finalToolCalls.map((toolCall, toolIndex) => {
-												// #region agent log
-												fetch(
-													"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-													{
-														method: "POST",
-														headers: { "Content-Type": "application/json" },
-														body: JSON.stringify({
-															location: "chat-stream.tsx:275",
-															message: "Rendering individual tool call",
-															data: {
-																messageId: message.id,
-																toolCallId: toolCall.toolCallId,
-																toolIndex,
-																totalToolCalls: toolCalls.length,
-																hasInput: !!toolCall.input,
-																hasRawInput: "rawInput" in toolCall,
-															},
-															sessionId: "debug-session",
-															runId: "run1",
-															hypothesisId: "F",
-														}),
-													},
-												).catch(() => {});
-												// #endregion
 												const toolResult = toolResults.find(
 													(tr) => tr.toolCallId === toolCall.toolCallId,
 												);
@@ -817,34 +365,6 @@ export function ChatStream({ messages }: ChatStreamProps) {
 												// Use the isMessageStreaming from outer scope (calculated above)
 												const isStreaming =
 													isMessageStreaming && searchResults.length > 0;
-
-												// #region agent log
-												fetch(
-													"http://127.0.0.1:7244/ingest/f534629e-950a-47de-8405-66a055ceff08",
-													{
-														method: "POST",
-														headers: { "Content-Type": "application/json" },
-														body: JSON.stringify({
-															location: "chat-stream.tsx:188",
-															message: "Rendering tool call",
-															data: {
-																searchQuery,
-																hasToolResult: !!toolResult,
-																searchResultsCount: searchResults.length,
-																hasOutput: !!toolResult?.output,
-																isStreaming,
-																isMessageStreaming,
-																isLastMessage,
-																allTextPartsDone,
-															},
-															timestamp: Date.now(),
-															sessionId: "debug-session",
-															runId: "run1",
-															hypothesisId: "F",
-														}),
-													},
-												).catch(() => {});
-												// #endregion
 
 												return (
 													<ToolCallUI
